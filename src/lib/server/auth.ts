@@ -81,7 +81,8 @@ function sanitizeReturnPath(path: string | undefined | null): string | undefined
 }
 
 export function refreshSessionCookie(cookies: Cookies, sessionId: string) {
-	cookies.set(config.COOKIE_NAME, sessionId, {
+	const cookieName = config.COOKIE_NAME || "ruvocal-session";
+	cookies.set(cookieName, sessionId, {
 		path: "/",
 		// So that it works inside the space's iframe
 		sameSite,
@@ -401,7 +402,7 @@ export async function authenticateRequest(
 	url: URL,
 	isApi?: boolean
 ): Promise<App.Locals & { secretSessionId: string }> {
-	const token = cookie.get(config.COOKIE_NAME);
+	const token = cookie.get(config.COOKIE_NAME || "ruvocal-session");
 
 	let email = null;
 	if (config.TRUSTED_EMAIL_HEADER) {

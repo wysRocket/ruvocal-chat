@@ -7,7 +7,7 @@ import { config } from "$lib/server/config";
 export async function POST({ locals, cookies }) {
 	await collections.sessions.deleteOne({ sessionId: locals.sessionId });
 
-	cookies.delete(config.COOKIE_NAME, {
+	cookies.delete(config.COOKIE_NAME || "ruvocal-session", {
 		path: "/",
 		// So that it works inside the space's iframe
 		sameSite: dev || config.ALLOW_INSECURE_COOKIES === "true" ? "lax" : "none",
