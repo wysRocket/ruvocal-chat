@@ -2,11 +2,11 @@
 	import { invalidateAll } from "$app/navigation";
 	import { page } from "$app/state";
 	import { base } from "$app/paths";
-	import type { Model } from "$lib/types/Model";
+	import type { ModelSummary } from "$lib/server/api/types";
 
 	interface Props {
-		models: Model[];
-		currentModel: Model;
+		models: ModelSummary[];
+		currentModel: ModelSummary;
 	}
 
 	let { models, currentModel }: Props = $props();

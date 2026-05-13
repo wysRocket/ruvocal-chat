@@ -82,17 +82,15 @@
 	type RouterProvider = { provider: string } & Record<string, unknown>;
 
 	$effect(() => {
-		const defaultPreprompt =
-			page.data.models.find((el: BackendModel) => el.id === modelId)?.preprompt || "";
+		const defaultPreprompt = (page.data.model as BackendModel | undefined)?.preprompt || "";
 		settings.initValue("customPrompts", modelId, defaultPreprompt);
 	});
 
 	let hasCustomPreprompt = $derived(
-		$settings.customPrompts[modelId] !==
-			page.data.models.find((el: BackendModel) => el.id === modelId)?.preprompt
+		$settings.customPrompts[modelId] !== (page.data.model as BackendModel | undefined)?.preprompt
 	);
 
-	let model = $derived(page.data.models.find((el: BackendModel) => el.id === modelId));
+	let model = $derived(page.data.model as BackendModel);
 	let providerList: RouterProvider[] = $derived((model?.providers ?? []) as RouterProvider[]);
 
 	// Initialize multimodal override for this model if not set yet

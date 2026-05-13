@@ -14,7 +14,7 @@
 	import ChatInput from "./ChatInput.svelte";
 	import VoiceRecorder from "./VoiceRecorder.svelte";
 	import StopGeneratingBtn from "../StopGeneratingBtn.svelte";
-	import type { Model } from "$lib/types/Model";
+	import type { ModelSummary } from "$lib/server/api/types";
 	import FileDropzone from "./FileDropzone.svelte";
 	import RetryBtn from "../RetryBtn.svelte";
 	import file2base64 from "$lib/utils/file2base64";
@@ -60,8 +60,8 @@
 		loading?: boolean;
 		pending?: boolean;
 		shared?: boolean;
-		currentModel: Model;
-		models: Model[];
+		currentModel: ModelSummary;
+		models: ModelSummary[];
 		preprompt?: string | undefined;
 		files?: File[];
 		onmessage?: (content: string) => void;

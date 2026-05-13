@@ -1,10 +1,10 @@
-import type { Model } from "$lib/types/Model";
+import type { ModelSummary } from "$lib/server/api/types";
 
 export const findCurrentModel = (
-	models: Model[],
+	models: ModelSummary[],
 	_oldModels: { id: string; transferTo?: string }[] = [],
 	id?: string
-): Model => {
+): ModelSummary => {
 	if (id) {
 		const direct = models.find((m) => m.id === id);
 		if (direct) return direct;

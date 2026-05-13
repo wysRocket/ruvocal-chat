@@ -20,7 +20,7 @@
 	import NavConversationItem from "./NavConversationItem.svelte";
 	import type { LayoutData } from "../../routes/$types";
 	import type { ConvSidebar } from "$lib/types/ConvSidebar";
-	import type { Model } from "$lib/types/Model";
+	import type { ModelSummary } from "$lib/server/api/types";
 	import { page } from "$app/state";
 	import InfiniteScroll from "./InfiniteScroll.svelte";
 	import { CONV_NUM_PER_PAGE } from "$lib/constants/pagination";
@@ -86,7 +86,7 @@
 		older: conversations.filter(({ updatedAt }) => updatedAt.getTime() < dateRanges[2]),
 	});
 
-	const nModels: number = page.data.models.filter((el: Model) => !el.unlisted).length;
+	const nModels: number = page.data.models.filter((el: ModelSummary) => !el.unlisted).length;
 
 	async function handleVisible() {
 		p++;

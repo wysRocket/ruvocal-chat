@@ -1,14 +1,14 @@
-<script lang="ts">
-	import Logo from "$lib/components/icons/Logo.svelte";
-	import type { Model } from "$lib/types/Model";
-	import { usePublicConfig } from "$lib/utils/PublicConfig.svelte";
+	<script lang="ts">
+		import Logo from "$lib/components/icons/Logo.svelte";
+		import type { ModelSummary } from "$lib/server/api/types";
+		import { usePublicConfig } from "$lib/utils/PublicConfig.svelte";
 
 	const publicConfig = usePublicConfig();
 
-	interface Props {
-		currentModel: Model;
-		onmessage?: (content: string) => void;
-	}
+		interface Props {
+			currentModel: ModelSummary;
+			onmessage?: (content: string) => void;
+		}
 
 	let { currentModel: _currentModel, onmessage }: Props = $props();
 
