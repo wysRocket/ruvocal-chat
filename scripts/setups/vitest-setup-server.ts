@@ -3,12 +3,14 @@ import dotenv from "dotenv";
 import { resolve } from "path";
 import fs from "fs";
 
-// Load the .env file
-const envPath = resolve(__dirname, "../../.env");
-dotenv.config({ path: envPath });
+const envCandidates = [resolve(__dirname, "../../.env"), resolve(__dirname, "../../.env.local")];
+const envPath = envCandidates.find((candidate) => fs.existsSync(candidate));
 
-// Read the .env file content
-const envContent = fs.readFileSync(envPath, "utf-8");
+if (envPath) {
+	dotenv.config({ path: envPath });
+}
+
+const envContent = envPath ? fs.readFileSync(envPath, "utf-8") : "";
 
 // Parse the .env content
 const envVars = dotenv.parse(envContent);
@@ -24,6 +26,9 @@ for (const [key, value] of Object.entries(envVars)) {
 		privateEnv[key] = value;
 	}
 }
+
+delete process.env.MONGODB_URL;
+delete process.env.MONGODB_DB_NAME;
 
 vi.mock("$env/dynamic/public", () => ({
 	env: publicEnv,

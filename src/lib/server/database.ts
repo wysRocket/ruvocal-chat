@@ -23,28 +23,45 @@ import type { TokenCache } from "$lib/types/TokenCache";
 import type { ConfigKey } from "$lib/types/ConfigKey";
 
 import { building } from "$app/environment";
+import { GridFSBucket, MongoClient, type Db } from "mongodb";
 import { onExit } from "./exitHandler";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { existsSync, mkdirSync } from "fs";
 
-import {
-	RvfCollection,
-	RvfGridFSBucket,
-	initRvfStore,
-	flushToDisk,
-} from "./database/rvf";
+import { RvfCollection, RvfGridFSBucket, initRvfStore, flushToDisk } from "./database/rvf";
 
 export const CONVERSATION_STATS_COLLECTION = "conversations.stats";
 
 export class Database {
 	private static instance: Database;
 	private initialized = false;
+	private client: MongoClient | null = null;
+	private db: Db | null = null;
 
 	private async init() {
+		const mongoUrl = process.env.MONGODB_URL?.trim();
+
+		if (mongoUrl) {
+			this.client = new MongoClient(mongoUrl);
+			await this.client.connect();
+			this.db = process.env.MONGODB_DB_NAME?.trim()
+				? this.client.db(process.env.MONGODB_DB_NAME.trim())
+				: this.client.db();
+			this.initialized = true;
+
+			console.log(`[RuVocal] Database: MongoDB (${this.db.databaseName})`);
+
+			onExit(async () => {
+				console.log("[RuVocal] Closing MongoDB client");
+				await this.client?.close();
+			});
+
+			return;
+		}
+
 		const dbFolder =
-			process.env.RVF_DB_PATH ||
-			join(dirname(fileURLToPath(import.meta.url)), "../../../db");
+			process.env.RVF_DB_PATH || join(dirname(fileURLToPath(import.meta.url)), "../../../db");
 
 		if (!existsSync(dbFolder)) {
 			mkdirSync(dbFolder, { recursive: true });
@@ -75,12 +92,36 @@ export class Database {
 		if (!this.initialized) {
 			throw new Error("Database not initialized");
 		}
-		return {}; // No external client — self-contained
+		return this.client ?? {}; // RVF mode has no external client
 	}
 
 	public getCollections() {
 		if (!this.initialized) {
 			throw new Error("Database not initialized");
+		}
+
+		if (this.db) {
+			const db = this.db;
+
+			return {
+				conversations: db.collection<Conversation>("conversations"),
+				conversationStats: db.collection<ConversationStats>(CONVERSATION_STATS_COLLECTION),
+				assistants: db.collection<Assistant>("assistants"),
+				assistantStats: db.collection<AssistantStats>("assistants.stats"),
+				reports: db.collection<Report>("reports"),
+				sharedConversations: db.collection<SharedConversation>("sharedConversations"),
+				abortedGenerations: db.collection<AbortedGeneration>("abortedGenerations"),
+				settings: db.collection<Settings>("settings"),
+				users: db.collection<User>("users"),
+				sessions: db.collection<Session>("sessions"),
+				messageEvents: db.collection<MessageEvent>("messageEvents"),
+				bucket: new GridFSBucket(db),
+				migrationResults: db.collection<MigrationResult>("migrationResults"),
+				semaphores: db.collection<Semaphore>("semaphores"),
+				tokenCaches: db.collection<TokenCache>("tokens"),
+				tools: db.collection<Record<string, unknown>>("tools"),
+				config: db.collection<ConfigKey>("config"),
+			};
 		}
 
 		const conversations = new RvfCollection<Conversation>("conversations");

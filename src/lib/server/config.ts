@@ -1,21 +1,39 @@
 import { env as publicEnv } from "$env/dynamic/public";
 import { env as serverEnv } from "$env/dynamic/private";
 import { building } from "$app/environment";
-import type { RvfCollection } from "$lib/server/database/rvf";
 import type { ConfigKey as ConfigKeyType } from "$lib/types/ConfigKey";
-import type { Semaphore } from "$lib/types/Semaphore";
 import { Semaphores } from "$lib/types/Semaphore";
 
 export type PublicConfigKey = keyof typeof publicEnv;
 const keysFromEnv = { ...publicEnv, ...serverEnv };
 export type ConfigKey = keyof typeof keysFromEnv;
 
+interface ConfigCollectionLike {
+	find(filter: Record<string, unknown>): { toArray(): Promise<ConfigKeyType[]> };
+	updateOne(
+		filter: Record<string, unknown>,
+		update: Record<string, unknown>,
+		options?: Record<string, unknown>
+	): Promise<unknown>;
+	deleteOne(filter: Record<string, unknown>): Promise<unknown>;
+	deleteMany(filter: Record<string, unknown>): Promise<unknown>;
+}
+
+interface SemaphoreCollectionLike {
+	countDocuments(filter: Record<string, unknown>): Promise<number>;
+	updateOne(
+		filter: Record<string, unknown>,
+		update: Record<string, unknown>,
+		options?: Record<string, unknown>
+	): Promise<unknown>;
+}
+
 class ConfigManager {
 	private keysFromDB: Partial<Record<ConfigKey, string>> = {};
 	private isInitialized = false;
 
-	private configCollection: RvfCollection<ConfigKeyType> | undefined;
-	private semaphoreCollection: RvfCollection<Semaphore> | undefined;
+	private configCollection: ConfigCollectionLike | undefined;
+	private semaphoreCollection: SemaphoreCollectionLike | undefined;
 	private lastConfigUpdate: Date | undefined;
 
 	async init() {
