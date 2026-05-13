@@ -1,0 +1,12 @@
+[build]
+  command = "ADAPTER=netlify npm run build"
+  publish = "build"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options        = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
